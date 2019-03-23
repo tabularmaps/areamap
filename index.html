@@ -1,0 +1,256 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>日本の区分のカラム地図表現（八地方区分・測量部担当地域） - Japan Area TabularMaps</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<link rel="apple-touch-icon" href="areamap.png"/>
+<meta property="og:image" content="areamap.png">
+<meta name="format-detection" content="telephone=no"/>
+<script src="https://fukuno.jig.jp/fukuno.js"></script>
+<script>'use strict'
+
+// 地方測量部担当地域（沖縄は 沖縄支所担当地域）
+const AREA_S = {
+	"北海道" : [ 1 ],
+	"東北": [ 2,3,4,5,6,7 ],
+	"関東": [ 8,9,10,11,12,13,14,19,20 ],
+	"北陸": [ 15,16,17,18 ],
+	"中部": [ 21,22,23,24 ],
+	"近畿": [ 25,26,27,28,29,30 ],
+	"中国": [ 31,32,33,34,35 ],
+	"四国": [ 36,37,38,39 ],
+	"九州": [ 40,41,42,43,44,45,46 ],
+	"沖縄": [ 47 ],
+}
+const AREA_8 = {
+	"北海道": [ 1 ],
+	"東北": [ 2,3,4,5,6,7 ],
+	"関東": [ 8,9,10,11,12,13,14 ],
+	"中部": [ 19,20,15,16,17,18,21,22,23 ],
+	"近畿": [ 24,25,26,27,28,29,30 ],
+	"中国": [ 31,32,33,34,35 ],
+	"四国": [ 36,37,38,39 ],
+	"九州・沖縄": [ 40,41,42,43,44,45,46,47 ],
+}
+
+const AREASET = {
+	"八地方区分": AREA_8,
+	"測量部担当地域": AREA_S,
+}
+
+window.onload = function() {
+	japan.innerHTML += makeJapanHTML()
+
+	jpall.innerHTML = ""
+	let selectArea = create("select")
+	for (let area in AREASET) {
+		let op = create("option")
+		op.value = area
+		op.textContent = area
+		selectArea.appendChild(op)
+	}
+	jpall.appendChild(selectArea)
+	paint(AREA_8)
+	selectArea.onchange = function() {
+		const areaset = AREASET[this.value]
+		paint(areaset)
+	}
+}
+const getArea = function(areaset, pref) {
+	let n = PREF.indexOf(pref) + 1
+	if (n <= 0)
+		n = PREF_S.indexOf(pref) + 1
+	if (n <= 0)
+		return null
+	for (let area in areaset) {
+		const nn = areaset[area]
+		if (nn.indexOf(n) >= 0)
+			return area
+	}
+	return null
+}
+
+const paint = function(areaset) {
+	
+	let color = {}
+	let n = 0
+	let arealen = 0
+	for (let area in areaset)
+		arealen++
+	for (let area in areaset) {
+		let c = hsv2rgb(360 / arealen * n, .4 + (n % 2) * .15, 1) 
+		color[area] = "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")";
+		n++
+	}
+	for (let i = 1; i <= 47; i++) {
+		const c = get("jp" + i)
+		const pref = PREF_S[i - 1]
+		c.num = i - 1
+		const area = getArea(areaset, pref)
+		c.innerHTML = pref + "<br><span class=area>（" + area + "）</span>"
+		c.style.backgroundColor = color[area]
+	}
+}
+
+
+// --
+const PREF = [ "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県", "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県", "新潟県", "富山県", "石川県", "福井県", "山梨県", "長野県", "岐阜県", "静岡県", "愛知県", "三重県", "滋賀県", "京都府", "大阪府", "兵庫県", "奈良県", "和歌山県", "鳥取県", "島根県", "岡山県", "広島県", "山口県", "徳島県", "香川県", "愛媛県", "高知県", "福岡県", "佐賀県", "長崎県", "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県" ];
+const PREF_S = [ '北海道', '青森', '岩手', '宮城', '秋田', '山形', '福島', '茨城', '栃木', '群馬', '埼玉', '千葉', '東京', '神奈川', '新潟', '富山', '石川', '福井', '山梨', '長野', '岐阜', '静岡', '愛知', '三重', '滋賀', '京都', '大阪', '兵庫', '奈良', '和歌山', '鳥取', '島根', '岡山', '広島', '山口', '徳島', '香川', '愛媛', '高知', '福岡', '佐賀', '長崎', '熊本', '大分', '宮崎', '鹿児島', '沖縄' ]
+
+// from CC0 カラム地図
+// https://hackmd.io/7m2A33zJSWq6DA9lYbvtpQ
+/*
+const JAPAN = `
+山口	島根	鳥取	石川	新潟	青森	北海道
+広島	岡山	兵庫	福井	富山	秋田	岩手
+長崎		大阪	京都	長野	山形	宮城
+佐賀	福岡		滋賀	山梨	群馬	福島
+熊本	宮崎	大分	三重	静岡	埼玉	栃木
+鹿児島	愛媛	香川	奈良	岐阜	東京	茨城
+沖縄	高知	徳島	和歌山	愛知	神奈川	千葉`
+*/
+
+/*
+const JAPAN = `
+山口	島根	鳥取	石川	新潟	青森	北海道
+広島	岡山	兵庫	福井	富山	秋田	岩手
+長崎	福岡	大阪	京都	長野	山形	宮城
+佐賀	宮崎	滋賀	日本	山梨	群馬	福島
+熊本	大分	奈良	日本	静岡	埼玉	栃木
+鹿児島	愛媛	香川	三重	岐阜	東京	茨城
+沖縄	高知	徳島	和歌山	愛知	神奈川	千葉`
+*/
+const JAPAN = `
+日本	日本	鳥取	石川	富山	青森	北海道
+山口	島根	岡山	福井	新潟	秋田	岩手
+長崎	福岡	広島	滋賀	長野	山形	宮城
+佐賀	大分	兵庫	京都	山梨	群馬	福島
+熊本	宮崎	大阪	奈良	岐阜	埼玉	栃木
+鹿児島	愛媛	香川	和歌山	静岡	東京	茨城
+沖縄	高知	徳島	三重	愛知	神奈川	千葉`
+
+
+const makeJapanHTML = function() {
+	let japan = []
+	const japans = JAPAN.trim().split('\n')
+	for (let j of japans) {
+		japan.push(j.split('\t'))
+	}
+	let s = []
+	s.push('<table id=jp0>')
+	let flg = false
+	for (let jpn of japan) {
+		s.push('<tr>')
+		for (let pref of jpn) {
+			const n = PREF_S.indexOf(pref)
+			if (n < 0) {
+				if (!flg) {
+					s.push('<td class=pref id=jpall colspan=2>' + pref + '</td>')
+					flg = true
+				}
+			} else {
+				s.push('<td class=pref id=jp' + (n + 1) + '>' + pref + '</td>')
+			}
+		}
+		s.push('</tr>')
+	}
+	s.push('</table>')
+	return s.join('')
+}
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	text-align: center;
+}
+/* japan */
+#japan {
+	display: inline-block;
+	width: 90vw;
+	height: 67vw;
+	x-background: red;
+	position: relative;
+}
+#jp0 {
+	border-spacing: 1vw;
+	border-collapse: separate;
+}
+#jp0 td {
+	width: calc(90vw / 7);
+	height: calc(60vw / 7);
+	font-size: 3vw;
+	vertical-align: middle;
+	text-align: center;
+	border-radius: .5vw;
+	border: 1px solid #333;
+	margin: 20px;
+}
+#jpall select {
+	font-size: 2.5vw;
+}
+/* */
+.area {
+	font-size: 1.7vw;
+}
+/* credit */
+.credit {
+	margin: 20px;
+	text-align: center;
+	font-size: 80%;
+}
+.credit a {
+	color: gray !important;
+}
+#debug {
+	text-align: left;
+}
+textarea {
+	width: 90%;
+	height: 5em;
+}
+h1 {
+	font-size: 3vw;
+	margin-top: 2vw;
+}
+h1 a {
+	color: #000 !important;
+	text-decoration: none;
+}
+#odicon {
+	width: 8vw;
+}
+#tbl table {
+	border-collapse: collapse;
+	margin: 10px 5px;
+}
+#tbl th, #tbl td:nth-child(1), #tbl td:nth-child(3), #tbl td:nth-child(4) {
+	white-space: nowrap;
+}
+#tbl td:nth-child(5) {
+	text-align: center;
+}
+#tbl th, #tbl td {
+	border: 1px solid gray;
+}
+</style>
+</head>
+<body>
+
+<h1>日本の区分のカラム地図表現（八地方区分・測量部担当地域）</h1>
+
+<div id="japan"></div>
+
+
+<div class="credit">
+<!--
+DATA: Public Domain <a href=http://linkdata.org/work/rdf1s127i target=_blank>日本のオープンデータ都市一覧 - LinkData.org</a><br>
+-->
+APP: CC BY <a href=https://fukuno.jig.jp/2434>福野泰介 - 日本の区分のカラム地図表現</a><br>
+Base APP: CC BY <a href=https://fukuno.jig.jp/2433>福野泰介 - 日本のオープンデータ都市率ダッシュボード</a><br>
+DATA: <a href=https://github.com/tabularmaps/77>地方測量部担当地域</a>, <a href=https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E5%9C%B0%E5%9F%9F>八地方区分 - Wikipedia</a><br>
+LAYOUT: CC0 <a href=https://hackmd.io/7m2A33zJSWq6DA9lYbvtpQ>カラム地図</a> (<a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a>)<br>
+</div>
+
+</body>
+</html>
