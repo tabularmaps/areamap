@@ -1,0 +1,127 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>福井カラム地図 - Fukui TabularMaps</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<link rel="apple-touch-icon" href="fukui.png"/>
+<meta property="og:image" content="fukui.png">
+<meta name="format-detection" content="telephone=no"/>
+<script>'use strict'
+
+const TABULARMAP_SRC = `
+	あわら市	勝山市	大野市
+坂井市	福井市	永平寺町	池田町
+越前町	鯖江市	越前市	南越前町
+高浜町	若狭町	小浜市	敦賀市
+おおい町	美浜町		`
+
+window.onload = function() {
+	tmap.innerHTML = makeTabularMap(TABULARMAP_SRC)
+
+	tmtitle.textContent = "福井県"
+
+//	document.getElementById("鯖江市").style.backgroundColor = "#ebb"
+}
+
+const makeTabularMap = function(src) {
+	let items = []
+	const ssrc = src.substring(1).split('\n')
+	for (let ss of ssrc) {
+		items.push(ss.split('\t'))
+	}
+	let s = []
+	let maxcol = 0
+	let nmaxcol = -1
+	s.push('<table class=tabularmaps>')
+	for (let row of items) {
+		s.push('<tr>')
+		for (let item of row) {
+			if (item.length == 0) {
+				let s2 = s[s.length - 1]
+				if (s2.startsWith("<td class=tmnull colspan=")) {
+					s.pop()
+					const ncol = parseInt(s2.substring("<td class=tmnull colspan=".length)) + 1
+					s.push('<td class=tmnull colspan=' + ncol + '</td>')
+					if (maxcol < ncol) {
+						maxcol = ncol
+						nmaxcol = s.length - 1
+					}
+				} else {
+					s.push('<td class=tmnull colspan=1></td>')
+					if (maxcol < 1) {
+						maxcol = 1
+						nmaxcol = s.length - 1
+					}
+				}
+			} else {
+				s.push('<td id="' + item + '">' + item + '</td>')
+			}
+		}
+		s.push('</tr>')
+	}
+	s[nmaxcol] = s[nmaxcol].replace('<td class=tmnull colspan=', '<td class=tmnull id=tmtitle colspan=')
+	s.push('</table>')
+	return s.join('')
+}
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	text-align: center;
+}
+h1 {
+	font-size: 3vw;
+	margin-top: 2vw;
+}
+/* tabularmaps */
+.tabularmaps {
+	border-spacing: 1vw;
+	border-collapse: separate;
+	display: inline-block;
+	width: 90vw;
+	height: 67vw;
+	position: relative;
+}
+.tabularmaps td {
+	width: calc(90vw / 4);
+	height: calc(60vw / 5);
+	font-size: 3vw;
+	vertical-align: middle;
+	text-align: center;
+	border-radius: .5vw;
+	border: 1px solid #333;
+	margin: 20px;
+}
+.tmnull {
+	background-color: #888;
+}
+#tmtitle {
+	color: white;
+}
+/* credit */
+.credit {
+	margin: 20px;
+	text-align: center;
+	font-size: 80%;
+}
+.credit a {
+	color: gray !important;
+}
+</style>
+</head>
+<body>
+
+<h1>福井カラム地図</h1>
+
+<div id="tmap"></div>
+
+<div class="credit">
+APP: CC BY <a href=https://fukuno.jig.jp/2434>福野泰介 - 日本の区分のカラム地図表現</a><br>
+Base APP: CC BY <a href=https://fukuno.jig.jp/2433>福野泰介 - 日本のオープンデータ都市率ダッシュボード</a><br>
+DATA: <a href=https://github.com/tabularmaps/77>地方測量部担当地域</a>, <a href=https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E5%9C%B0%E5%9F%9F>八地方区分 - Wikipedia</a><br>
+LAYOUT: CC0 <a href=https://hackmd.io/7m2A33zJSWq6DA9lYbvtpQ>カラム地図</a> (<a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a>)<br>
+</div>
+
+</body>
+</html>

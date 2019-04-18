@@ -1,0 +1,179 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Nepal - TabularMaps</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<link rel="apple-touch-icon" xhref="fukui.png"/>
+<meta property="og:image" xcontent="fukui.png">
+<meta name="format-detection" content="telephone=no"/>
+<script src=https://fukuno.jig.jp/fukuno.js></script>
+<script>'use strict'
+
+const DISTRICTS = [ "Taplejung", "Sankhuwasabha", "Solukhumbu", "Panchthar", "Illam", "Dhankuta", "Terhathum", "Bhojpur", "Okhaldhunga", "Khotang", "Udayapur", "Jhapa", "Morang", "Sunsari", "Saptari", "Siraha", "Dolakha", "Sindhupalchok", "Rasuwa", "Sindhuli", "Ramechhap", "Kavrepalanchok", "Nuwakot", "Dhading", "Makwanpur", "Lalitpur", "Bhaktapur", "Kathmandu", "Dhanusa", "Mahottari", "Sarlahi", "Rautahat", "Bara", "Parsa", "Chitwan", "Manang", "Mustang", "Gorkha", "Lamjung", "Tanahu", "Syangja", "Kaski", "Myagdi", "Parbat", "Baglung", "Gulmi", "Palpa", "Arghakhanchi", "Nawalparasi", "Rupandehi", "Kapilvastu", "Dolpa", "Jumla", "Kalikot", "Mugu", "Humla", "Pyuthan", "Rolpa", "Rukum", "Salyan", "Surkhet", "Dailekh", "Jajarkot", "Dang", "Banke", "Bardiya", "Bajura", "Bajhang", "Darchula", "Achham", "Doti", "Dadeldhura", "Baitadi", "Kailali", "Kanchanpur" ]
+
+const VALUES = [ 33117, 25719, 20410, 31059, 32955, 20767, 14966, 26535, 23685, 41894, 45751, 99079, 106666, 105010, 90082, 88649, 28739, 42904, 5638, 54201, 28819, 58467, 38345, 51949, 67401, 61387, 30233, 185783, 123543, 123106, 154034, 122770, 155144, 101385, 77954, 285, 1505, 40421, 22175, 46286, 35407, 58130, 15642, 16104, 45222, 44086, 38136, 29932, 95954, 133612, 105528, 6013, 20311, 34909, 10888, 11794, 47047, 47468, 59730, 46293, 66941, 59893, 56072, 81579, 85237, 67846, 25845, 48928, 20861, 58660, 41851, 21839, 54903, 133717, 64865 ]
+
+const makeTabularSource = function(ds, w, off) {
+	if (!off)
+		off = 0
+	const res = []
+	for (let i = 0; i < ds.length + off; i++) {
+		if (i < off) {
+			res.push('\t')
+		} else {
+			res.push(ds[i - off])
+			res.push(i % w < w - 1 ? '\t' : '\n')
+		}
+	}
+	res.pop() // last n
+	return res.join("")
+}
+
+window.onload = function() {
+	tmap.innerHTML = makeTabularMap(makeTabularSource(DISTRICTS, 7, 2))
+	tmtitle.textContent = "Nepal"
+
+	document.getElementById("Kathmandu").style.backgroundColor = "#ebb"
+
+	//paint(40, DISTRICTS, VALUES)
+}
+
+
+const paint = function(hue, dis, data) {
+	let min = 100000000000
+	let max = -min
+	let sum = 0
+	for (let i = 0; i < data.length; i++) {
+		let n = parseFloat(data[i])
+		if (n < min)
+			min = n
+		if (n > max)
+			max = n
+		sum += n
+	}
+
+	for (let i = 0; i < dis.length; i++) {
+		const name = dis[i]
+		const c = document.getElementById(name)
+//		const v = (data[i] / sum * 100).toFixed(2) + "%"
+		const v = addComma(data[i])
+		c.innerHTML = "<span class=pref>" + name + "</span><br><span class=value>" + v + "</span>"
+		
+		let r = (parseFloat(data[i]) - min) / (max - min)
+		let col
+		const w = .9
+		if (r < .5) {
+			col = hsv2rgb(hue + 180, (1 - (r + w / 2)) * w * 2, 1) 
+		} else {
+			col = hsv2rgb(hue, (r - w / 2) * w * 2, 1) 
+		}
+		c.style.backgroundColor = "rgb(" + col[0] + "," + col[1] + "," + col[2] + ")"
+		//c.style.color = r > .9 || r < .1 ? "white" : "black"
+		c.style.color = r < .2 ? "white" : "black"
+	}
+}
+const makeTabularMap = function(src) {
+	let items = []
+	if (src.charAt(0) == '\n')
+		src = src.substring(1)
+	const ssrc = src.split('\n')
+	for (let ss of ssrc) {
+		items.push(ss.split('\t'))
+	}
+	let s = []
+	let maxcol = 0
+	let nmaxcol = -1
+	s.push('<table class=tabularmaps>')
+	for (let row of items) {
+		s.push('<tr>')
+		for (let item of row) {
+			if (item.length == 0) {
+				let s2 = s[s.length - 1]
+				if (s2.startsWith("<td class=tmnull colspan=")) {
+					s.pop()
+					const ncol = parseInt(s2.substring("<td class=tmnull colspan=".length)) + 1
+					s.push('<td class=tmnull colspan=' + ncol + '</td>')
+					if (maxcol < ncol) {
+						maxcol = ncol
+						nmaxcol = s.length - 1
+					}
+				} else {
+					s.push('<td class=tmnull colspan=1></td>')
+					if (maxcol < 1) {
+						maxcol = 1
+						nmaxcol = s.length - 1
+					}
+				}
+			} else {
+				s.push('<td id="' + item + '">' + item + '</td>')
+			}
+		}
+		s.push('</tr>')
+	}
+	s[nmaxcol] = s[nmaxcol].replace('<td class=tmnull colspan=', '<td class=tmnull id=tmtitle colspan=')
+	s.push('</table>')
+	return s.join('')
+}
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	text-align: center;
+}
+h1 {
+	font-size: 3vw;
+	margin-top: 2vw;
+}
+/* tabularmaps */
+.tabularmaps {
+	x-border-spacing: .5vw;
+	x-border-collapse: separate;
+	border-collapse: collapse;
+	display: inline-block;
+	width: 95vw;
+	height: 55vw;
+	position: relative;
+}
+.tabularmaps td {
+	width: calc(95vw / 7);
+	height: calc(55vw / 11);
+	font-size: 1.6vw;
+	vertical-align: middle;
+	text-align: center;
+	x-border-radius: .5vw;
+	border: 1px solid #333;
+	margin: 0;
+	padding: 0;
+}
+.tmnull {
+	background-color: #888;
+}
+#tmtitle {
+	color: white;
+}
+/* credit */
+.credit {
+	margin: 20px;
+	text-align: center;
+	font-size: 80%;
+}
+.credit a {
+	color: gray !important;
+}
+</style>
+</head>
+<body>
+
+<h1>Nepal - TabularMaps</h1>
+
+<div id="tmap"></div>
+
+<div class="credit">
+APP: CC BY <a href=https://fukuno.jig.jp/2460>Taisuke Fukuno</a><br>
+DATA: <a href=http://opendatanepal.com/dataset/number-of-students-enrolled-in-primary-school-by-75-districts-2003-to-2015>Number of Students Enrolled in Primary School by 75 Districts 2003 to 2015 - Datasets - Open Data Nepal</a><br>
+LAYOUT: <a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a><br>
+</div>
+
+</body>
+</html>
