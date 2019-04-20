@@ -3,10 +3,10 @@
 https://tabularmaps.github.io/areamap/  
 
 福井カラム地図  
-https://tabularmaps.github.io/areamap/fukui.ihtml  
+https://tabularmaps.github.io/areamap/fukui.html  
 
 広島カラム地図β  
-https://tabularmaps.github.io/areamap/hiroshima.ihtml  
+https://tabularmaps.github.io/areamap/hiroshima.html  
 
 ネパールカラム地図β  
-https://tabularmaps.github.io/areamap/nepal.ihtml  
+https://tabularmaps.github.io/areamap/nepal.html  
