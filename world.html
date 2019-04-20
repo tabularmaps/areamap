@@ -31,7 +31,7 @@ window.onload = function() {
 			// make area color
 			let color = {}
 			let arealen = 0
-			for (let i = 1; i < iso3166.length; i++) {
+			for (let i = 0; i < iso3166.length; i++) {
 				let area = iso3166[i]["area"]
 				if (!color[area]) {
 					color[area] = "rgb"
@@ -60,7 +60,7 @@ window.onload = function() {
 				c.style.color = "white"
 				past = c
 			}
-			for (let i = 1; i < iso3166.length; i++) {
+			for (let i = 0; i < iso3166.length; i++) {
 				let code = iso3166[i]["alpha-2"]
 				let area = iso3166[i]["area"]
 				let name = iso3166[i]["name"]
