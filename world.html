@@ -1,0 +1,225 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>世界カラム地図 / The World TabularMaps</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<link rel="apple-touch-icon" href="hiroshima.png"/>
+<meta property="og:image" content="hiroshima.png">
+<meta name="format-detection" content="telephone=no"/>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://fukuno.jig.jp/fukuno.js"></script>
+<script>'use strict'
+
+window.onload = function() {
+	d3.csv('https://tabularmaps.github.io/8bit/board.csv').then(map => {
+		d3.csv('https://tabularmaps.github.io/areamap/iso3166.csv').then(iso3166 => {
+			let a = []
+			for (let i = 0; i < map.length - 1; i++) {
+				let a2 = []
+				for (let j = 0; j < 16; j++) {
+					let name = j < 10 ? " " + j : j
+					a2.push(map[i][name].trim())
+				}
+				a.push(a2.join('\t'))
+			}
+			let src = a.join('\n')
+			src = src.toUpperCase()
+
+			tmap.innerHTML = makeTabularMap(src)
+			
+			// make area color
+			let color = {}
+			let arealen = 0
+			for (let i = 1; i < iso3166.length; i++) {
+				let area = iso3166[i]["area"]
+				if (!color[area]) {
+					color[area] = "rgb"
+					arealen++
+				}
+			}
+			let n = 0
+			for (let area in color) {
+				let c = hsv2rgb(360 / arealen * n, .3 + (n % 2) * .15, 1) 
+				color[area] = "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")";
+				n++
+			}
+
+			let past = null
+			let lastsel = new Date().getTime()
+			const selected = function(c) {
+				if (past == c)
+					return
+				if (past !== null) {
+					past.style.backgroundColor = past.bkbg
+					past.style.color = "black"
+				}
+				info.innerHTML = c.data.code + " - " + c.data.area + "<br>" + c.data.nameja + "<br>" + c.data.name
+				c.bkbg = c.style.backgroundColor
+				c.style.backgroundColor = "#f55"
+				c.style.color = "white"
+				past = c
+			}
+			for (let i = 1; i < iso3166.length; i++) {
+				let code = iso3166[i]["alpha-2"]
+				let area = iso3166[i]["area"]
+				let name = iso3166[i]["name"]
+				let nameja = iso3166[i]["nameja"]
+				let c = document.getElementById(code)
+				if (c) {
+					c.data = { code: code, area: area, name: name, nameja: nameja }
+					c.onmouseover = e => {
+						selected(e.target)
+						lastsel = new Date().getTime() + 5 * 1000
+					}
+					c.onmousedown = e => {
+						selected(e.target)
+						lastsel = new Date().getTime() + 10 * 1000
+					}
+					c.style.cursor = "default"
+					c.style.backgroundColor = color[area]
+				} else {
+					console.log("can't find: " + code + " " + nameja)
+				}
+			}
+
+			// randam
+			setInterval(function() {
+				if (lastsel > new Date().getTime())
+					return
+				for (;;) {
+					let n = iso3166[rnd(iso3166.length - 1) + 1]
+					let c = document.getElementById(n["alpha-2"])
+					if (!c)
+						continue
+					selected(c)
+					break
+				}
+			}, 1000)
+		})
+	})
+//	tmtitle.textContent = "the world"
+}
+
+const paintTabularMap = function(areaset) {
+	for (let i = 1; i <= 47; i++) {
+		const c = get("jp" + i)
+		const pref = PREF_S[i - 1]
+		c.num = i - 1
+		const area = getArea(areaset, pref)
+		c.innerHTML = pref + "<br><span class=area>（" + area + "）</span>"
+		c.style.backgroundColor = color[area]
+	}
+}
+
+const makeTabularMap = function(src) {
+	let items = []
+	if (src.charAt(0) == '\n')
+		src = src.substring(1)
+	const ssrc = src.split('\n')
+	for (let ss of ssrc) {
+		items.push(ss.split('\t'))
+	}
+	let s = []
+	let maxcol = 0
+	let nmaxcol = -1
+	s.push('<table class=tabularmaps>')
+	for (let row of items) {
+		s.push('<tr>')
+		for (let item of row) {
+			if (item.length == 0) {
+				let s2 = s[s.length - 1]
+				if (s2.startsWith("<td class=tmnull colspan=")) {
+					s.pop()
+					const ncol = parseInt(s2.substring("<td class=tmnull colspan=".length)) + 1
+					s.push('<td class=tmnull colspan=' + ncol + '</td>')
+					if (maxcol < ncol) {
+						maxcol = ncol
+						nmaxcol = s.length - 1
+					}
+				} else {
+					s.push('<td class=tmnull colspan=1></td>')
+					if (maxcol < 1) {
+						maxcol = 1
+						nmaxcol = s.length - 1
+					}
+				}
+			} else {
+				s.push('<td id="' + item + '">' + item + '</td>')
+			}
+		}
+		s.push('</tr>')
+	}
+	if (s[nmaxcol])
+		s[nmaxcol] = s[nmaxcol].replace('<td class=tmnull colspan=', '<td class=tmnull id=tmtitle colspan=')
+	s.push('</table>')
+	return s.join('')
+}
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	text-align: center;
+}
+h1 {
+	font-size: 3vw;
+	margin-top: 2vw;
+}
+#info {
+	border: 1px solid black;
+	margin: 1vw;
+	padding: 0.5vw;
+	font-size: 3vw;
+	min-height: 5em;
+}
+/* tabularmaps */
+.tabularmaps {
+	border-spacing: 0vw;
+	border-collapse: collapse;
+	display: inline-block;
+	width: 95vw;
+	height: 57vw;
+	position: relative;
+}
+.tabularmaps td {
+	width: calc(90vw / 16);
+	height: calc(60vw / 16);
+	font-size: 3vw;
+	vertical-align: middle;
+	text-align: center;
+	border: 1px solid #333;
+	margin: 20px;
+}
+.tmnull {
+	background-color: #ddd;
+}
+#tmtitle {
+	color: white;
+}
+/* credit */
+.credit {
+	margin: 20px;
+	text-align: center;
+	font-size: 80%;
+}
+.credit a {
+	color: gray !important;
+}
+</style>
+</head>
+<body>
+
+<h1>世界カラム地図 / the World TabularMaps</h1>
+
+<div id="tmap"></div>
+<div id="info"></div>
+
+<div class="credit">
+APP: CC BY <a href=http://fukuno.jig.jp/2462>福野泰介 - まるでパズルなカラム地図</a><br>
+Base APP: CC BY <a href=https://fukuno.jig.jp/2433>福野泰介 - 日本のオープンデータ都市率ダッシュボード</a><br>
+DATA: <a href=https://github.com/tabularmaps/77>地方測量部担当地域</a>, <a href=https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E5%9C%B0%E5%9F%9F>八地方区分 - Wikipedia</a><br>
+LAYOUT: CC0 <a href=https://hackmd.io/7m2A33zJSWq6DA9lYbvtpQ>カラム地図</a> (<a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a>)<br>
+</div>
+
+</body>
+</html>
