@@ -1,27 +1,28 @@
 <html>
 <head>
 <meta charset="utf-8"/>
-<title>福井カラム地図 - Fukui TabularMaps</title>
+<title>広島カラム地図 - Hiroshima TabularMaps</title>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-<link rel="apple-touch-icon" href="fukui.png"/>
-<meta property="og:image" content="fukui.png">
+<link rel="apple-touch-icon" href="hiroshima.png"/>
+<meta property="og:image" content="hiroshima.png">
 <meta name="format-detection" content="telephone=no"/>
 <script>'use strict'
 
 const TABULARMAP_SRC = `
-	あわら市	勝山市	大野市
-坂井市	福井市	永平寺町	池田町
-越前町	鯖江市	越前市	南越前町
-高浜町	若狭町	美浜町	敦賀市
-おおい町	小浜市		`
+安芸太田町	北広島町	安芸高田市	三次市	庄原市
+広島市	府中町	東広島市	世羅町	神石高原町
+坂町	海田町	熊野町	三原市	府中市
+廿日市市	大竹市	呉市	竹原市	福山市
+		江田島市	大崎上島町	尾道市`
+
 
 window.onload = function() {
 	tmap.innerHTML = makeTabularMap(TABULARMAP_SRC)
 
-	tmtitle.textContent = "福井県"
+	tmtitle.textContent = "広島県"
 
-//	document.getElementById("鯖江市").style.backgroundColor = "#ebb"
+//	document.getElementById("広島市").style.backgroundColor = "#ebb"
 }
 
 const makeTabularMap = function(src) {
@@ -112,7 +113,7 @@ h1 {
 </head>
 <body>
 
-<h1>福井カラム地図</h1>
+<h1>広島カラム地図</h1>
 
 <div id="tmap"></div>
 
