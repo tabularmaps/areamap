@@ -15,11 +15,15 @@ window.onload = function() {
 	d3.csv('https://tabularmaps.github.io/8bit/board.csv').then(map => {
 		d3.csv('https://tabularmaps.github.io/areamap/iso3166.csv').then(iso3166 => {
 			let a = []
-			for (let i = 0; i < map.length - 1; i++) {
+			for (let i = 0; i < map.length; i++) {
 				let a2 = []
 				for (let j = 0; j < 16; j++) {
 					let name = j < 10 ? " " + j : j
-					a2.push(map[i][name].trim())
+					let code = map[i][name].trim()
+					console.log(code)
+					if (code == "vw")
+						code = "bw"
+					a2.push(code)
 				}
 				a.push(a2.join('\t'))
 			}
