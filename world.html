@@ -105,17 +105,6 @@ window.onload = function() {
 //	tmtitle.textContent = "the world"
 }
 
-const paintTabularMap = function(areaset) {
-	for (let i = 1; i <= 47; i++) {
-		const c = get("jp" + i)
-		const pref = PREF_S[i - 1]
-		c.num = i - 1
-		const area = getArea(areaset, pref)
-		c.innerHTML = pref + "<br><span class=area>（" + area + "）</span>"
-		c.style.backgroundColor = color[area]
-	}
-}
-
 const makeTabularMap = function(src) {
 	let items = []
 	if (src.charAt(0) == '\n')
