@@ -1,0 +1,311 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>世界人口カラム地図 / The World Population TabularMaps</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<link rel="apple-touch-icon" href="world-population.png"/>
+<meta property="og:image" content="world-population.png">
+<meta name="format-detection" content="telephone=no"/>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://fukuno.jig.jp/fukuno.js"></script>
+<script>'use strict'
+
+window.onload = function() {
+	d3.csv('https://tabularmaps.github.io/8bit/board.csv').then(map => {
+		d3.csv('https://tabularmaps.github.io/areamap/iso3166.csv').then(iso3166 => {
+			let a = []
+			for (let i = 0; i < map.length; i++) {
+				let a2 = []
+				for (let j = 0; j < 16; j++) {
+					let name = j < 10 ? " " + j : j
+					let code = map[i][name].trim()
+					a2.push(code)
+				}
+				a.push(a2.join('\t'))
+			}
+			let src = a.join('\n')
+			src = src.toUpperCase()
+
+			tmap.innerHTML = makeTabularMap(src)
+			
+			// make area color
+			let color = {}
+			let arealen = 0
+			for (let i = 0; i < iso3166.length; i++) {
+				let area = iso3166[i]["area"]
+				if (!color[area]) {
+					color[area] = "rgb"
+					arealen++
+				}
+			}
+			let n = 0
+			for (let area in color) {
+				let c = hsv2rgb(360 / arealen * n, .3 + (n % 2) * .15, 1) 
+				color[area] = "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")";
+				n++
+			}
+
+			let past = null
+			let lastsel = new Date().getTime()
+			const selected = function(c) {
+				if (past == c || !c.data)
+					return
+				if (past !== null) {
+					past.style.backgroundColor = past.bkbg
+//					past.style.color = "black"
+				}
+				info.innerHTML = c.getContent()
+				c.bkbg = c.style.backgroundColor
+				c.style.backgroundColor = "#f55"
+//				c.style.color = "white"
+				past = c
+			}
+			for (let i = 0; i < iso3166.length; i++) {
+				let code = iso3166[i]["alpha-2"]
+				let code3 = iso3166[i]["alpha-3"]
+				let area = iso3166[i]["area"]
+				let name = iso3166[i]["name"]
+				let nameja = iso3166[i]["nameja"]
+				let c = document.getElementById(code)
+				if (c) {
+					c.data = { code: code, code3: code3, area: area, name: name, nameja: nameja }
+					c.getContent = function() {
+						const c = this
+						return c.data.code + " - " + c.data.area + "<br>" + c.data.nameja + "<br>" + c.data.name
+					}
+					c.onmouseover = e => {
+						selected(e.target)
+						lastsel = new Date().getTime() + 5 * 1000
+					}
+					c.onmousedown = e => {
+						selected(e.target)
+						lastsel = new Date().getTime() + 10 * 1000
+					}
+					c.style.cursor = "default"
+					c.style.borderColor = color[area]
+				} else {
+					console.log("can't find: " + code + " " + nameja)
+				}
+			}
+
+			d3.csv('https://tabularmaps.github.io/areamap/data/API_SE.ADT.1524.LT.ZS_DS2_en_csv_v2_10516824/API_SE.ADT.1524.LT.ZS_DS2_en_csv_v2_10516824-dataonly.csv').then(data => {
+				//console.log(data)
+				//const year = 2017
+				paintTabularMap(34, iso3166, data)
+			})
+			/*
+			// randam
+			setInterval(function() {
+				if (lastsel > new Date().getTime())
+					return
+				for (;;) {
+					let n = iso3166[rnd(iso3166.length - 1) + 1]
+					let c = document.getElementById(n["alpha-2"])
+					if (!c)
+						continue
+					selected(c)
+					break
+				}
+			}, 1000)
+			*/
+		})
+	})
+//	tmtitle.textContent = "the world"
+}
+
+const paintTabularMap = function(hue, iso3166, data, year) {
+	const getPopulation = function(code3) {
+		for (let i = 0; i < data.length; i++) {
+			if (data[i]["Country Code"] == code3) {
+				return data[i]
+			}
+		}
+		return null
+	}
+	const getLiteracy = function(data) {
+		for (let i = 2018; i >= 1960; i--) {
+			if (("" + data[i]).length != 0)
+				return { year: i, value: parseFloat(data[i]) }
+		}
+		return null
+	}
+
+	let min = 100000000000
+	let max = -min
+	let sum = 0
+	for (let i = 0; i < iso3166.length; i++) {
+		const code3 = iso3166[i]["alpha-3"]
+		const pop = getPopulation(code3)
+		if (!pop) {
+			//console.log("no data : " + code3)
+			continue
+		}
+		let v = getLiteracy(pop)
+		if (v) {
+			const n = v.value
+			if (n < min)
+				min = n
+			if (n > max)
+				max = n
+			sum += n
+		}
+	}
+
+	for (let i = 0; i < iso3166.length; i++) {
+		const code3 = iso3166[i]["alpha-3"]
+		const code2 = iso3166[i]["alpha-2"]
+		const pop = getPopulation(code3)
+		if (!pop) {
+			//console.log("no code : " + code3)
+			continue
+		}
+		const lite = getLiteracy(pop)
+		if (!lite)
+			continue
+		const np = lite.value
+		const c = document.getElementById(code2)
+		const v = np.toFixed(2) + "%"
+//		const v = addComma(n)
+		c.innerHTML = "<span class=pref>" + code3 + "</span><br><span class=value>" + v + "</span>"
+		
+		c.getContent = function() {
+			const c = this
+			return c.data.code + "/" + c.data.code3 + " - " + c.data.area + " 識字率: " + v + "(" + lite.year + ")<br>" + c.data.nameja + "<br>" + c.data.name
+		}
+
+		let r = (parseFloat(n) - min) / (max - min)
+		let col
+		const w = .9
+		/*
+		if (r < .5) {
+			col = hsv2rgb(hue + 180, (1 - (r + w / 2)) * w * 2, 1) 
+		} else {
+			col = hsv2rgb(hue, (r - w / 2) * w * 2, 1) 
+		}
+		*/
+		if (r < .5) {
+			let h = np < 1 ? (np < .1 ? hue + 180 : hue + 160) : hue - 110
+			col = hsv2rgb(h, (1 - (r + w / 2)) * w * 2, 1) 
+		} else {
+			col = hsv2rgb(hue, (r - w / 2) * w * 2, 1) 
+		}
+
+		c.style.backgroundColor = "rgb(" + col[0] + "," + col[1] + "," + col[2] + ")"
+		//c.style.color = r > .9 || r < .1 ? "white" : "black"
+		c.style.color = r < .2 ? "white" : "black"
+	}
+}
+
+const makeTabularMap = function(src) {
+	let items = []
+	if (src.charAt(0) == '\n')
+		src = src.substring(1)
+	const ssrc = src.split('\n')
+	for (let ss of ssrc) {
+		items.push(ss.split('\t'))
+	}
+	let s = []
+	let maxcol = 0
+	let nmaxcol = -1
+	s.push('<table class=tabularmaps>')
+	for (let row of items) {
+		s.push('<tr>')
+		for (let item of row) {
+			if (item.length == 0) {
+				let s2 = s[s.length - 1]
+				if (s2.startsWith("<td class=tmnull colspan=")) {
+					s.pop()
+					const ncol = parseInt(s2.substring("<td class=tmnull colspan=".length)) + 1
+					s.push('<td class=tmnull colspan=' + ncol + '</td>')
+					if (maxcol < ncol) {
+						maxcol = ncol
+						nmaxcol = s.length - 1
+					}
+				} else {
+					s.push('<td class=tmnull colspan=1></td>')
+					if (maxcol < 1) {
+						maxcol = 1
+						nmaxcol = s.length - 1
+					}
+				}
+			} else {
+				s.push('<td id="' + item + '">' + item + '</td>')
+			}
+		}
+		s.push('</tr>')
+	}
+	if (s[nmaxcol])
+		s[nmaxcol] = s[nmaxcol].replace('<td class=tmnull colspan=', '<td class=tmnull id=tmtitle colspan=')
+	s.push('</table>')
+	return s.join('')
+}
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	text-align: center;
+}
+h1 {
+	font-size: 3vw;
+	margin-top: 2vw;
+}
+#info {
+	border: 1px solid black;
+	margin: 1vw;
+	padding: 0.5vw;
+	font-size: 3vw;
+	min-height: 4.2em;
+}
+/* tabularmaps */
+.tabularmaps {
+	border-spacing: 0vw;
+	border-collapse: collapse;
+	display: inline-block;
+	width: 95vw;
+	x-height: 57vw;
+	position: relative;
+}
+.tabularmaps td {
+	width: calc(90vw / 16);
+	height: calc(60vw / 16);
+	font-size: 1.2vw;
+	vertical-align: middle;
+	text-align: center;
+	border: .4vw solid #fff;
+	margin: 20px;
+}
+.tmnull {
+	background-color: #eee;
+}
+#tmtitle {
+	color: white;
+}
+/* credit */
+.credit {
+	margin: 20px;
+	text-align: center;
+	font-size: 80%;
+}
+.credit a {
+	color: gray !important;
+}
+</style>
+</head>
+<body>
+
+<h1>世界人口カラム地図 / the World Population TabularMaps</h1>
+
+<div id="tmap"></div>
+<div id="info"></div>
+
+<div class="credit">
+APP: CC BY <a href=http://fukuno.jig.jp/2465>Taisuke Fukuno - The World Population TabularMaps / 世界人口カラム地図</a><br>
+Base APP: CC BY <a href=https://fukuno.jig.jp/2463>The World TabularMaps / 世界カラム地図</a><br>
+DATA: <a href=https://data.worldbank.org/indicator/SP.POP.TOTL>Population, total | Data - The World Bank</a><br>
+DATA: <a href=https://github.com/tabularmaps/8bit>TabularMaps - 8bit</a>, <a href=https://ja.wikipedia.org/wiki/ISO_3166-1>ISO3166-1</a>(<a href=https://tabularmaps.github.io/areamap/iso3166.csv>CSV</a>)<br>
+LAYOUT: CC0 <a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a><br>
+</div>
+
+</body>
+</html>
