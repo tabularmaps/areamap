@@ -109,7 +109,7 @@ window.onload = function() {
 						setTimeout(f, 100)
 					}
 				}
-				setTimeout(f, 1500)
+				setTimeout(f, 3000)
 			})
 			/*
 			// randam
@@ -177,7 +177,7 @@ const paintTabularMap = function(hue, iso3166, data, year) {
 		
 		c.getContent = function() {
 			const c = this
-			return c.data.code + "/" + c.data.code3 + " - " + c.data.area + " 人口(" + year + "年): " + addComma(nn) + "<br>" + c.data.nameja + "<br>" + c.data.name
+			return c.data.code + "/" + c.data.code3 + " - " + c.data.area + " 人口: " + addComma(nn) + "(" + year + ")<br>" + c.data.nameja + "<br>" + c.data.name
 		}
 
 		let r = (parseFloat(n) - min) / (max - min)
