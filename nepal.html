@@ -12,8 +12,6 @@
 
 const DISTRICTS = [ "Taplejung", "Sankhuwasabha", "Solukhumbu", "Panchthar", "Illam", "Dhankuta", "Terhathum", "Bhojpur", "Okhaldhunga", "Khotang", "Udayapur", "Jhapa", "Morang", "Sunsari", "Saptari", "Siraha", "Dolakha", "Sindhupalchok", "Rasuwa", "Sindhuli", "Ramechhap", "Kavrepalanchok", "Nuwakot", "Dhading", "Makwanpur", "Lalitpur", "Bhaktapur", "Kathmandu", "Dhanusa", "Mahottari", "Sarlahi", "Rautahat", "Bara", "Parsa", "Chitwan", "Manang", "Mustang", "Gorkha", "Lamjung", "Tanahu", "Syangja", "Kaski", "Myagdi", "Parbat", "Baglung", "Gulmi", "Palpa", "Arghakhanchi", "Nawalparasi", "Rupandehi", "Kapilvastu", "Dolpa", "Jumla", "Kalikot", "Mugu", "Humla", "Pyuthan", "Rolpa", "Rukum", "Salyan", "Surkhet", "Dailekh", "Jajarkot", "Dang", "Banke", "Bardiya", "Bajura", "Bajhang", "Darchula", "Achham", "Doti", "Dadeldhura", "Baitadi", "Kailali", "Kanchanpur" ]
 
-const VALUES = [ 33117, 25719, 20410, 31059, 32955, 20767, 14966, 26535, 23685, 41894, 45751, 99079, 106666, 105010, 90082, 88649, 28739, 42904, 5638, 54201, 28819, 58467, 38345, 51949, 67401, 61387, 30233, 185783, 123543, 123106, 154034, 122770, 155144, 101385, 77954, 285, 1505, 40421, 22175, 46286, 35407, 58130, 15642, 16104, 45222, 44086, 38136, 29932, 95954, 133612, 105528, 6013, 20311, 34909, 10888, 11794, 47047, 47468, 59730, 46293, 66941, 59893, 56072, 81579, 85237, 67846, 25845, 48928, 20861, 58660, 41851, 21839, 54903, 133717, 64865 ]
-
 const makeTabularSource = function(ds, w, off) {
 	if (!off)
 		off = 0
@@ -36,7 +34,19 @@ window.onload = function() {
 
 	document.getElementById("Kathmandu").style.backgroundColor = "#ebb"
 
-	//paint(40, DISTRICTS, VALUES)
+	linkCells(tmap)
+}
+
+const linkCells = function(divid) {
+	for (let tr of divid.childNodes[0].childNodes[0].childNodes) {
+		for (let td of tr.childNodes) {
+			const name = td.textContent
+			if (name.length > 0) {
+				const url = "https://en.wikipedia.org/wiki/" + encodeURIComponent(name)
+				td.innerHTML = "<a href=" + url + ">" + name + "</a>"
+			}
+		}
+	}
 }
 
 
@@ -145,6 +155,14 @@ h1 {
 	border: 1px solid #333;
 	margin: 0;
 	padding: 0;
+}
+.tabularmaps a {
+	text-decoration: none;
+	color: black;
+}
+.tabularmaps a:visited {
+	text-decoration: none;
+	color: #055;
 }
 .tmnull {
 	background-color: #888;

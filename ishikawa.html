@@ -1,28 +1,26 @@
 <html>
 <head>
 <meta charset="utf-8"/>
-<title>広島カラム地図 - Hiroshima TabularMaps</title>
+<title>石川カラム地図 - Ishikawa TabularMaps</title>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-<link rel="apple-touch-icon" href="hiroshima.png"/>
-<meta property="og:image" content="hiroshima.png">
+<link rel="apple-touch-icon" href="ishikawa.png"/>
+<meta property="og:image" content="ishikawa.png">
 <meta name="format-detection" content="telephone=no"/>
 <script>'use strict'
 
+// 19市町 4x5
 const TABULARMAP_SRC = `
-安芸太田町	北広島町	安芸高田市	三次市	庄原市
-広島市	府中町	東広島市	世羅町	神石高原町
-坂町	海田町	熊野町	三原市	府中市
-廿日市市	大竹市	呉市	竹原市	福山市
-		江田島市	大崎上島町	尾道市`
-
+輪島市	穴水町	能登町	珠洲市
+志賀町	羽咋市	中能登町	七尾市
+内灘町	かほく市	宝達志町	津幡町
+白山市	川北町	野々市市	金沢市
+加賀市	小松市	能美市	`
 
 window.onload = function() {
 	tmap.innerHTML = makeTabularMap(TABULARMAP_SRC)
+	tmtitle.textContent = "石川県"
 
-	tmtitle.textContent = "広島県"
-
-//	document.getElementById("広島市").style.backgroundColor = "#ebb"
 	linkCells(tmap)
 }
 
@@ -134,14 +132,13 @@ h1 {
 </head>
 <body>
 
-<h1>広島カラム地図</h1>
+<h1>石川カラム地図</h1>
 
 <div id="tmap"></div>
 
 <div class="credit">
 APP: CC BY <a href=http://fukuno.jig.jp/2462>福野泰介 - まるでパズルなカラム地図</a><br>
 Base APP: CC BY <a href=https://fukuno.jig.jp/2433>福野泰介 - 日本のオープンデータ都市率ダッシュボード</a><br>
-DATA: <a href=https://github.com/tabularmaps/77>地方測量部担当地域</a>, <a href=https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E5%9C%B0%E5%9F%9F>八地方区分 - Wikipedia</a><br>
 LAYOUT: CC0 <a href=https://hackmd.io/7m2A33zJSWq6DA9lYbvtpQ>カラム地図</a> (<a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a>)<br>
 </div>
 

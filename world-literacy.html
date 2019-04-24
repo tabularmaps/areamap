@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta charset="utf-8"/>
-<title>世界人口カラム地図 / The World Population TabularMaps</title>
+<title>世界若者識字率カラム地図 / the World Literacy Rate Youth TabularMaps</title>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
 <link rel="apple-touch-icon" href="world-population.png"/>
@@ -174,22 +174,23 @@ const paintTabularMap = function(hue, iso3166, data, year) {
 			return c.data.code + "/" + c.data.code3 + " - " + c.data.area + " 識字率: " + v + "(" + lite.year + ")<br>" + c.data.nameja + "<br>" + c.data.name
 		}
 
-		let r = (parseFloat(n) - min) / (max - min)
+		let r = (np - min) / (max - min)
 		let col
 		const w = .9
-		/*
 		if (r < .5) {
 			col = hsv2rgb(hue + 180, (1 - (r + w / 2)) * w * 2, 1) 
 		} else {
 			col = hsv2rgb(hue, (r - w / 2) * w * 2, 1) 
 		}
-		*/
+		
+		/*
 		if (r < .5) {
 			let h = np < 1 ? (np < .1 ? hue + 180 : hue + 160) : hue - 110
 			col = hsv2rgb(h, (1 - (r + w / 2)) * w * 2, 1) 
 		} else {
 			col = hsv2rgb(hue, (r - w / 2) * w * 2, 1) 
 		}
+		*/
 
 		c.style.backgroundColor = "rgb(" + col[0] + "," + col[1] + "," + col[2] + ")"
 		//c.style.color = r > .9 || r < .1 ? "white" : "black"
@@ -247,7 +248,7 @@ body {
 	text-align: center;
 }
 h1 {
-	font-size: 3vw;
+	font-size: 2.5vw;
 	margin-top: 2vw;
 }
 #info {
@@ -294,7 +295,7 @@ h1 {
 </head>
 <body>
 
-<h1>世界人口カラム地図 / the World Population TabularMaps</h1>
+<h1>世界若者識字率カラム地図 / the World Literacy Rate Youth TabularMaps</h1>
 
 <div id="tmap"></div>
 <div id="info"></div>
@@ -302,7 +303,7 @@ h1 {
 <div class="credit">
 APP: CC BY <a href=http://fukuno.jig.jp/2465>Taisuke Fukuno - The World Population TabularMaps / 世界人口カラム地図</a><br>
 Base APP: CC BY <a href=https://fukuno.jig.jp/2463>The World TabularMaps / 世界カラム地図</a><br>
-DATA: <a href=https://data.worldbank.org/indicator/SP.POP.TOTL>Population, total | Data - The World Bank</a><br>
+DATA: <a href=https://data.worldbank.org/indicator/SE.ADT.1524.LT.ZS?end=1995&start=1970>Literacy rate, youth total (% of people ages 15-24) | Data - The World Bank</a><br>
 DATA: <a href=https://github.com/tabularmaps/8bit>TabularMaps - 8bit</a>, <a href=https://ja.wikipedia.org/wiki/ISO_3166-1>ISO3166-1</a>(<a href=https://tabularmaps.github.io/areamap/iso3166.csv>CSV</a>)<br>
 LAYOUT: CC0 <a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a><br>
 </div>

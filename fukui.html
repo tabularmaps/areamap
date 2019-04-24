@@ -22,8 +22,20 @@ window.onload = function() {
 	tmtitle.textContent = "福井県"
 
 //	document.getElementById("鯖江市").style.backgroundColor = "#ebb"
+	linkCells(tmap)
 }
 
+const linkCells = function(divid) {
+	for (let tr of divid.childNodes[0].childNodes[0].childNodes) {
+		for (let td of tr.childNodes) {
+			const name = td.textContent
+			if (name.length > 0) {
+				const url = "https://ja.wikipedia.org/wiki/" + encodeURIComponent(name)
+				td.innerHTML = "<a href=" + url + ">" + name + "</a>"
+			}
+		}
+	}
+}
 const makeTabularMap = function(src) {
 	let items = []
 	const ssrc = src.substring(1).split('\n')
@@ -92,6 +104,14 @@ h1 {
 	border-radius: .5vw;
 	border: 1px solid #333;
 	margin: 20px;
+}
+.tabularmaps a {
+	text-decoration: none;
+	color: black;
+}
+.tabularmaps a:visited {
+	text-decoration: none;
+	color: #055;
 }
 .tmnull {
 	background-color: #888;
