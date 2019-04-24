@@ -3,9 +3,6 @@
 https://tabularmaps.github.io/areamap/  
 
 世界カラム地図  
-https://tabularmaps.github.io/areamap/world-pop.html  
-
-世界カラム地図  
 https://tabularmaps.github.io/areamap/world.html  
 
 福井カラム地図  
@@ -16,3 +13,13 @@ https://tabularmaps.github.io/areamap/hiroshima.html
 
 ネパールカラム地図β  
 https://tabularmaps.github.io/areamap/nepal.html  
+
+石川カラム地図  
+https://tabularmaps.github.io/areamap/ishikawa.html  
+
+富山カラム地図β  
+https://tabularmaps.github.io/areamap/toyama.html  
+
+世界人口カラム地図  
+https://tabularmaps.github.io/areamap/world-pop.html  
+
