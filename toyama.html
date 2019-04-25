@@ -10,11 +10,22 @@
 <script>'use strict'
 
 // 15市町村 4x4
+/* // v1.0
 const TABULARMAP_SRC = `
 氷見市	高岡市	入善町	朝日町
 射水市	滑川市	魚津市	黒部市
 矢部市	砺波市	富山市	舟橋村
 南砺市	立山市	上市町	`
+*/
+// v1.1
+const TABULARMAP_SRC = `
+氷見市	射水市	入善町	朝日町
+高岡市	砺波市	滑川市	黒部市
+矢部市	舟橋村	上市町	魚津市
+南砺市	富山市	立山市	`
+
+// thanks! @macoto_1655 https://twitter.com/macoto_1655/status/1121239508169547782
+
 
 window.onload = function() {
 	tmap.innerHTML = makeTabularMap(TABULARMAP_SRC)
