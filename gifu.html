@@ -1,0 +1,148 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>岐阜カラム地図 - Gifu TabularMaps</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<link rel="apple-touch-icon" href="gifu.png"/>
+<meta property="og:image" content="gifu.png">
+<meta name="format-detection" content="telephone=no"/>
+<script>'use strict'
+
+// 42市町村 7x6
+const TABULARMAP_SRC = `
+揖斐川町	大野町	本巣市	山県市	白川村	飛騨市	高山市
+垂井町 	池田町	北方町	関市	美濃市	郡上市	下呂市
+関ヶ原町	神戸町	瑞穂市	富加町	七宗町	白川町	東白川村
+養老町	大垣市	岐阜市	美濃加茂市	川辺町	八百津町	中津川市
+輪之内町	安八町	岐南町	坂祝町	可児市	御嵩町	恵那市
+海津市	羽島市	笠松町	各務原市	多治見市	土岐市	瑞浪市`
+
+
+window.onload = function() {
+	tmap.innerHTML = makeTabularMap(TABULARMAP_SRC)
+//	tmtitle.textContent = "岐阜県"
+
+	linkCells(tmap)
+}
+
+const linkCells = function(divid) {
+	for (let tr of divid.childNodes[0].childNodes[0].childNodes) {
+		for (let td of tr.childNodes) {
+			const name = td.textContent
+			if (name.length > 0) {
+				const url = "https://ja.wikipedia.org/wiki/" + encodeURIComponent(name)
+				td.innerHTML = "<a href=" + url + ">" + name + "</a>"
+			}
+		}
+	}
+}
+
+const makeTabularMap = function(src) {
+	let items = []
+	const ssrc = src.substring(1).split('\n')
+	for (let ss of ssrc) {
+		items.push(ss.split('\t'))
+	}
+	let s = []
+	let maxcol = 0
+	let nmaxcol = -1
+	s.push('<table class=tabularmaps>')
+	for (let row of items) {
+		s.push('<tr>')
+		for (let item of row) {
+			if (item.length == 0) {
+				let s2 = s[s.length - 1]
+				if (s2.startsWith("<td class=tmnull colspan=")) {
+					s.pop()
+					const ncol = parseInt(s2.substring("<td class=tmnull colspan=".length)) + 1
+					s.push('<td class=tmnull colspan=' + ncol + '</td>')
+					if (maxcol < ncol) {
+						maxcol = ncol
+						nmaxcol = s.length - 1
+					}
+				} else {
+					s.push('<td class=tmnull colspan=1></td>')
+					if (maxcol < 1) {
+						maxcol = 1
+						nmaxcol = s.length - 1
+					}
+				}
+			} else {
+				s.push('<td id="' + item + '">' + item + '</td>')
+			}
+		}
+		s.push('</tr>')
+	}
+//	s[nmaxcol] = s[nmaxcol].replace('<td class=tmnull colspan=', '<td class=tmnull id=tmtitle colspan=')
+	s.push('</table>')
+	return s.join('')
+}
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	text-align: center;
+}
+h1 {
+	font-size: 3vw;
+	margin-top: 2vw;
+}
+/* tabularmaps */
+.tabularmaps {
+	border-spacing: 1vw;
+	border-collapse: separate;
+	display: inline-block;
+	width: 90vw;
+	height: 67vw;
+	position: relative;
+}
+.tabularmaps td {
+	width: calc(90vw / 7);
+	height: calc(60vw / 6);
+	font-size: 3vw;
+	vertical-align: middle;
+	text-align: center;
+	border-radius: .5vw;
+	border: 1px solid #333;
+	margin: 20px;
+}
+.tabularmaps a {
+	text-decoration: none;
+	color: black;
+}
+.tabularmaps a:visited {
+	text-decoration: none;
+	color: #055;
+}
+.tmnull {
+	background-color: #888;
+}
+#tmtitle {
+	color: white;
+}
+/* credit */
+.credit {
+	margin: 20px;
+	text-align: center;
+	font-size: 80%;
+}
+.credit a {
+	color: gray !important;
+}
+</style>
+</head>
+<body>
+
+<h1>岐阜カラム地図</h1>
+
+<div id="tmap"></div>
+
+<div class="credit">
+APP: CC BY <a href=http://fukuno.jig.jp/2462>福野泰介 - まるでパズルなカラム地図</a><br>
+Base APP: CC BY <a href=https://fukuno.jig.jp/2433>福野泰介 - 日本のオープンデータ都市率ダッシュボード</a><br>
+LAYOUT: CC0 <a href=https://hackmd.io/7m2A33zJSWq6DA9lYbvtpQ>カラム地図</a> (<a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a>)<br>
+</div>
+
+</body>
+</html>
