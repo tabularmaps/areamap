@@ -1,0 +1,116 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>日本カラム地図 - TabularMaps Japan</title>
+<link rel="apple-touch-icon" href="tabularmaps_japan.png"/>
+<meta property="og:image" content="tabularmaps_japan.png">
+<meta name="format-detection" content="telephone=no"/>
+<script type='module'>
+
+import util from './util.mjs'
+
+window.onload = async function() {
+	const area = await util.fetchCSVtoJSON('./tabularmaps_japan.csv')
+
+	const show = function(name) {
+		let tmapdata = area[0]
+		for (const d of area) {
+			if (d.name == name) {
+				tmapdata = d
+				break
+			}
+		}
+		back.style.display = tmapdata == area[0] ? 'none' : 'inline-block'
+		
+		const tmap = util.makeGrids(tmapdata.tabularmap)
+		console.log(tmap)
+		tmapc.innerHTML = ''
+		tmapc.appendChild(tmap)
+		tmtitle.textContent = tmapdata.name_ja
+
+		for (const c of tmap.children) {
+			const name = c.textContent
+			if (name != '-') {
+				c.onclick = function() {
+					const name = c.textContent
+					for (const d of area) {
+						if (d.name_ja == name) {
+							show(d.name)
+							document.location.hash = '#' + d.name
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+
+	const onhashchange = function() {
+		const hash = document.location.hash
+		if (hash.length > 1) {
+			show(hash.substring(1))
+		} else {
+			show('Japan')
+		}
+	}
+	window.onhashchange = onhashchange
+	onhashchange()
+
+	back.onclick = function() {
+		history.back()
+	}
+}
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	text-align: center;
+}
+h1 {
+	font-size: 3vw;
+	margin-top: 2vw;
+}
+/* tabularmaps */
+#tmapc span {
+	font-size: 2vw;
+	vertical-align: middle;
+	text-align: center;
+	border-radius: .5vw;
+	border: .1vw solid #333;
+	padding: .5vw 0;
+	margin: .2vw;
+}
+/* other */
+#tmtitle {
+	color: black;
+}
+#back {
+	display: none;
+	margin: 1vw;
+	padding: .5vw;
+}
+/* credit */
+.credit {
+	margin: 20px;
+	text-align: center;
+	font-size: 80%;
+}
+.credit a {
+	color: #666 !important;
+}
+</style>
+</head>
+<body>
+
+<h1><span id=tmtitle>日本</span>カラム地図</h1>
+
+<div id="tmapc"></div>
+<button id='back'>もどる</button>
+
+<div class="credit">
+APP: CC BY <a href=https://fukuno.jig.jp/>@taisukef 福野泰介</a> (<a href=https://fukuno.jig.jp/2821>全国版完成！</a> / <a href=http://fukuno.jig.jp/2467>カラム地図で辿る</a>)<br>
+LAYOUT: <a href=tabularmaps_japan.csv>TabularMaps Japan - 日本カラム地図 CSV</a> CC0 <a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a><br>
+LIB: <a href=util.mjs>util.mjs</a> CC BY <a href=https://fukuno.jig.jp/2819>@taisukef</a><br>
+</div>
+
+</body>
+</html>
