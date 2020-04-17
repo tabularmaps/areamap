@@ -12,8 +12,16 @@ window.onload = async function() {
 	const url_citiesjp = 'https://code4fukui.github.io/localgovjp/localgovjp-utf8.csv'
 	const cities = await util.fetchCSVtoJSON(url_citiesjp)
 	console.log(cities)
+	const getCityData = function(pref, city) {
+		for (const d of cities) {
+			if (d.pref == pref && d.city == city) {
+				return d
+			}
+		}
+		return null
+	}
 
-	const area = await util.fetchCSVtoJSON('./tabularmaps_japan.csv' + '?')
+	const area = await util.fetchCSVtoJSON('./tabularmaps_japan.csv' + '?2')
 	checkTabularMaps(area, cities)
 
 	const show = function(name) {
@@ -27,7 +35,6 @@ window.onload = async function() {
 		back.style.display = tmapdata == area[0] ? 'none' : 'inline-block'
 		
 		const tmap = util.makeGrids(tmapdata.tabularmap)
-		console.log(tmap)
 		tmapc.innerHTML = ''
 		tmapc.appendChild(tmap)
 		tmtitle.textContent = tmapdata.name_ja
@@ -37,6 +44,12 @@ window.onload = async function() {
 			if (name != '-') {
 				c.onclick = function() {
 					const name = c.textContent
+					const data = getCityData(tmapdata.name_ja, name)
+					if (data) {
+						window.open(data.url, '_blank')
+						return
+					}
+					// pref
 					for (const d of area) {
 						if (d.name_ja == name) {
 							show(d.name)
@@ -74,7 +87,6 @@ const checkTabularMaps = function(area, cities) {
 		return false
 	}
 	for (const a of area) {
-		//console.log(a)
 		const pid = a.id
 		if (pid == 0)
 			continue
@@ -84,13 +96,11 @@ const checkTabularMaps = function(area, cities) {
 			cs = cs.concat(cc.split(' '))
 		}
 		//console.log(cs)
-		/*
 		for (const c of cs) {
 			if (c != '-' && !contains(pid, c)) {
 				console.log('err', a.name_ja, c)
 			}
 		}
-		*/
 		for (const c of cities) {
 			if (c.pid != pid)
 				continue
@@ -153,6 +163,7 @@ h1 {
 <div class="credit">
 APP: CC BY <a href=https://fukuno.jig.jp/>@taisukef 福野泰介</a> (<a href=https://fukuno.jig.jp/2821>全国版完成！</a> / <a href=http://fukuno.jig.jp/2467>カラム地図で辿る</a>)<br>
 LAYOUT: <a href=tabularmaps_japan.csv>TabularMaps Japan - 日本カラム地図 CSV</a> CC0 <a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a><br>
+DATA: <a href=https://github.com/code4fukui/localgovjp>code4fukui/localgovjp: list of local government in Japan (日本の地方自治体一覧オープンデータ)</a><br>
 LIB: <a href=util.mjs>util.mjs</a> CC BY <a href=https://fukuno.jig.jp/2819>@taisukef</a><br>
 </div>
 
