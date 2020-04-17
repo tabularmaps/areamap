@@ -578,6 +578,7 @@ const makeGrids = function(stab) {
   const c = document.createElement('div')
   c.style.display = 'grid'
   c.style.gridTemplateColumns = `repeat(${maxc}, 1fr)`
+  c.style.gridTemplateRows = `repeat(${lines.length}, 1fr)`
   const areas = []
   for (const ar of area) {
     for (const a of ar) {
