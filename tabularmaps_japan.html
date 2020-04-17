@@ -13,7 +13,7 @@ window.onload = async function() {
 	const cities = await util.fetchCSVtoJSON(url_citiesjp)
 	console.log(cities)
 
-	const area = await util.fetchCSVtoJSON('./tabularmaps_japan.csv')
+	const area = await util.fetchCSVtoJSON('./tabularmaps_japan.csv' + '?')
 	checkTabularMaps(area, cities)
 
 	const show = function(name) {
