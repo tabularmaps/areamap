@@ -9,7 +9,12 @@
 import util from './util.mjs'
 
 window.onload = async function() {
+	const url_citiesjp = 'https://code4fukui.github.io/localgovjp/localgovjp-utf8.csv'
+	const cities = await util.fetchCSVtoJSON(url_citiesjp)
+	console.log(cities)
+
 	const area = await util.fetchCSVtoJSON('./tabularmaps_japan.csv')
+	checkTabularMaps(area, cities)
 
 	const show = function(name) {
 		let tmapdata = area[0]
@@ -59,6 +64,45 @@ window.onload = async function() {
 		document.location.hash = ''
 	}
 }
+const checkTabularMaps = function(area, cities) {
+	const contains = function(pid, cityname) {
+		for (const c of cities) {
+			if (c.pid == pid && c.city == cityname) {
+				return true
+			}
+		}
+		return false
+	}
+	for (const a of area) {
+		//console.log(a)
+		const pid = a.id
+		if (pid == 0)
+			continue
+		const cs1 = a.tabularmap.split('\n')
+		let cs = []
+		for (const cc of cs1) {
+			cs = cs.concat(cc.split(' '))
+		}
+		//console.log(cs)
+		/*
+		for (const c of cs) {
+			if (c != '-' && !contains(pid, c)) {
+				console.log('err', a.name_ja, c)
+			}
+		}
+		*/
+		for (const c of cities) {
+			if (c.pid != pid)
+				continue
+			if (a.name_ja != '東京都' && c.city.endsWith('区'))
+				continue
+			if (cs.indexOf(c.city) == -1) {
+				console.log('err not found', a.name_ja, c.city)
+			}
+		}
+	}
+}
+
 </script>
 <style>
 body {
