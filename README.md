@@ -1,4 +1,7 @@
 # AreaMap
+日本の都道府県から各区市町村を表示する白カラム地図（TabularMaps）  
+https://tabularmaps.github.io/areamap/tabularmaps_japan.html  
+
 日本の都道府県を区分毎に色分けして表示するカラム地図（TabularMaps）  
 https://tabularmaps.github.io/areamap/  
 
