@@ -1,14 +1,15 @@
-<html>
-<head>
-<meta charset="utf-8"/>
-<title>日本の区分のカラム地図表現（八地方区分・測量部担当地域） - Japan Area TabularMaps</title>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-<link rel="apple-touch-icon" href="areamap.png"/>
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>日本の区分のカラム地図表現 - Japan Area TabularMaps</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="areamap.png">
 <meta property="og:image" content="areamap.png">
-<meta name="format-detection" content="telephone=no"/>
-<script src="https://fukuno.jig.jp/fukuno.js"></script>
-<script>'use strict'
+<meta name="format-detection" content="telephone=no">
+<script type="module">
+import { hsv2rgb } from "https://js.sabae.cc/hsv2rgb.js";
+import { CSV } from "https://js.sabae.cc/CSV.js";
+import { JAPAN_PREF_SHORT } from "https://js.sabae.cc/JAPAN_PREF.js";
+import { create, get } from "./util.js";
 
 // 地方測量部担当地域（沖縄は 沖縄支所担当地域）
 const AREA_S = {
@@ -22,7 +23,7 @@ const AREA_S = {
 	"四国": [ 36,37,38,39 ],
 	"九州": [ 40,41,42,43,44,45,46 ],
 	"沖縄": [ 47 ],
-}
+};
 const AREA_8 = {
 	"北海道": [ 1 ],
 	"東北": [ 2,3,4,5,6,7 ],
@@ -32,31 +33,23 @@ const AREA_8 = {
 	"中国": [ 31,32,33,34,35 ],
 	"四国": [ 36,37,38,39 ],
 	"九州・沖縄": [ 40,41,42,43,44,45,46,47 ],
+};
+
+const AREA_10 = {};
+
+const areamap = await CSV.fetchJSON("./japan_area.csv");
+const areanames = areamap.find(i => i.area == "日本").contains.split(" ");
+for (const area of areanames) {
+	AREA_10[area] = areamap.find(i => i.area == area).contains.split(" ").map(i => JAPAN_PREF_SHORT.indexOf(i) + 1);
 }
+console.log(AREA_10);
 
 const AREASET = {
 	"八地方区分": AREA_8,
 	"測量部担当地域": AREA_S,
-}
+	"総務省統計局地域区分": AREA_10,
+};
 
-window.onload = function() {
-	japan.innerHTML += makeJapanHTML()
-
-	jpall.innerHTML = ""
-	let selectArea = create("select")
-	for (let area in AREASET) {
-		let op = create("option")
-		op.value = area
-		op.textContent = area
-		selectArea.appendChild(op)
-	}
-	jpall.appendChild(selectArea)
-	paint(AREA_8)
-	selectArea.onchange = function() {
-		const areaset = AREASET[this.value]
-		paint(areaset)
-	}
-}
 const getArea = function(areaset, pref) {
 	let n = PREF.indexOf(pref) + 1
 	if (n <= 0)
@@ -72,15 +65,14 @@ const getArea = function(areaset, pref) {
 }
 
 const paint = function(areaset) {
-	
 	let color = {}
 	let n = 0
 	let arealen = 0
 	for (let area in areaset)
 		arealen++
 	for (let area in areaset) {
-		let c = hsv2rgb(360 / arealen * n, .4 + (n % 2) * .15, 1) 
-		color[area] = "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")";
+		const c = hsv2rgb(360 / arealen * n, .4 + (n % 2) * .15, 1);
+		color[area] = c;
 		n++
 	}
 	for (let i = 1; i <= 47; i++) {
@@ -132,7 +124,7 @@ const JAPAN = `
 
 
 const makeJapanHTML = function() {
-	let japan = []
+	const japan = []
 	const japans = JAPAN.trim().split('\n')
 	for (let j of japans) {
 		japan.push(j.split('\t'))
@@ -157,7 +149,26 @@ const makeJapanHTML = function() {
 	}
 	s.push('</table>')
 	return s.join('')
+};
+
+
+japan.innerHTML += makeJapanHTML()
+
+jpall.innerHTML = ""
+const selectArea = create("select")
+for (let area in AREASET) {
+	const op = create("option")
+	op.value = area
+	op.textContent = area
+	selectArea.appendChild(op)
 }
+jpall.appendChild(selectArea)
+paint(AREA_8)
+selectArea.onchange = function() {
+	const areaset = AREASET[this.value]
+	paint(areaset)
+}
+
 </script>
 <style>
 body {
@@ -179,7 +190,7 @@ body {
 #jp0 td {
 	width: calc(90vw / 7);
 	height: calc(60vw / 7);
-	font-size: 3vw;
+	font-size: 2vw;
 	vertical-align: middle;
 	text-align: center;
 	border-radius: .5vw;
@@ -187,15 +198,16 @@ body {
 	margin: 20px;
 }
 #jpall select {
-	font-size: 2.5vw;
+	font-size: 2.2vw;
 }
 /* */
 .area {
-	font-size: 1.7vw;
+	font-size: 1.3vw;
 }
 /* credit */
 .credit {
-	margin: 20px;
+	display: block;
+	margin: 40px 0;
 	text-align: center;
 	font-size: 80%;
 }
@@ -237,7 +249,7 @@ h1 a {
 </head>
 <body>
 
-<h1>日本の区分のカラム地図表現（八地方区分・測量部担当地域）</h1>
+<h1>日本の区分のカラム地図表現</h1>
 
 <div id="japan"></div>
 
@@ -248,7 +260,7 @@ DATA: Public Domain <a href=http://linkdata.org/work/rdf1s127i target=_blank>日
 -->
 APP: CC BY <a href=https://fukuno.jig.jp/2434>福野泰介 - 日本の区分のカラム地図表現</a><br>
 Base APP: CC BY <a href=https://fukuno.jig.jp/2433>福野泰介 - 日本のオープンデータ都市率ダッシュボード</a><br>
-DATA: <a href=https://github.com/tabularmaps/77>地方測量部担当地域</a>, <a href=https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E5%9C%B0%E5%9F%9F>八地方区分 - Wikipedia</a><br>
+DATA: <a href=https://github.com/tabularmaps/77>地方測量部担当地域</a>, <a href=https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E5%9C%B0%E5%9F%9F>八地方区分 - Wikipedia</a>, <a href=https://www.stat.go.jp/data/shugyou/1997/3-1.html>統計局ホームページ/地域区分</a><br>
 LAYOUT: CC0 <a href=https://hackmd.io/7m2A33zJSWq6DA9lYbvtpQ>カラム地図</a> (<a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a>)<br>
 </div>
 
