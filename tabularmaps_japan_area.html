@@ -1,0 +1,169 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>日本カラム地図 エリア対応 - TabularMaps Japan</title>
+<link rel="apple-touch-icon" href="tabularmaps_japan.png"/>
+<meta property="og:image" content="tabularmaps_japan.png">
+<meta name="format-detection" content="telephone=no"/>
+<script type="module">
+import { CSV } from "https://js.sabae.cc/CSV.js";
+import { makeGrids } from "./util.js";
+
+window.onload = async function() {
+	const url_citiesjp = "https://code4fukui.github.io/localgovjp/localgovjp-utf8.csv";
+	const cities = await CSV.fetchJSON(url_citiesjp);
+	const getCityData = (pref, city) => {
+		for (const d of cities) {
+			if (d.pref == pref && d.city == city) {
+				return d;
+			}
+		}
+		const d = cities.find(i => i.city == city);
+		return d;
+	};
+
+	const area = await CSV.fetchJSON("./tabularmaps_japan_area.csv");
+	checkTabularMaps(area, cities);
+
+	const show = (id) => {
+		let tmapdata = area[0];
+		for (const d of area) {
+			if (d.id == id) {
+				tmapdata = d;
+				break;
+			}
+		}
+		back.style.display = tmapdata == area[0] ? "none" : "inline-block";
+		
+		const tmap = makeGrids(tmapdata.tabularmap);
+		tmapc.innerHTML = "";
+		tmapc.appendChild(tmap);
+		tmtitle.textContent = tmapdata.name_ja;
+
+		for (const c of tmap.children) {
+			const name = c.textContent;
+			if (name != "-") {
+				c.onclick = () => {
+					const name = c.textContent;
+					const data = getCityData(tmapdata.name_ja, name);
+					if (data) {
+						window.open(data.url, "_blank");
+						return
+					}
+					// dig
+					//const p = area.find(i => i.parent_name_ja == tmapdata.name_ja);
+					console.log(tmapdata.name_ja, name, tmapdata.id);
+					for (const d of area) {
+						if (d.name_ja == name && d.parent == tmapdata.id) {
+							show(d.id);
+							document.location.hash = "#" + d.id;
+							break;
+						}
+					}
+				}
+			}
+		}
+	};
+
+	const onhashchange = function() {
+		const hash = document.location.hash;
+		if (hash.length > 1) {
+			show(hash.substring(1));
+		} else {
+			show("");
+		}
+	}
+	window.onhashchange = onhashchange;
+	onhashchange();
+
+	back.onclick = () => history.back();
+};
+const checkTabularMaps = function(area, cities) {
+	const contains = function(pid, cityname) {
+		for (const c of cities) {
+			if (c.pid == pid && c.city == cityname) {
+				return true;
+			}
+		}
+		return false;
+	}
+	for (const a of area) {
+		const pid = a.id;
+		if (pid == 0) continue;
+		const cs1 = a.tabularmap.split("\n")
+		let cs = [];
+		for (const cc of cs1) {
+			cs = cs.concat(cc.split(" "));
+		}
+		//console.log(cs)
+		for (const c of cs) {
+			if (c != "-" && !contains(pid, c)) {
+				console.log("err", a.name_ja, c);
+			}
+		}
+		for (const c of cities) {
+			if (c.pid != pid) continue;
+			if (a.name_ja != "東京都" && c.city.endsWith("区")) continue;
+			if (cs.indexOf(c.city) == -1) {
+				console.log("err not found", a.name_ja, c.city);
+			}
+		}
+	}
+};
+
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	text-align: center;
+}
+h1 {
+	font-size: 3vw;
+	margin-top: 2vw;
+}
+/* tabularmaps */
+#tmapc span {
+	display: flex;
+	font-size: 2.0vmax;
+	align-items: center;
+	justify-content: center;
+	border-radius: .5vmax;
+	border: .1vmax solid #333;
+	padding: 2vmax .2vmax;
+	margin: .2vmax;
+}
+/* other */
+#tmtitle {
+	color: black;
+}
+#back {
+	display: none;
+	margin: 1vw;
+	padding: .5vw;
+}
+/* credit */
+.credit {
+	margin: 20px;
+	text-align: center;
+	font-size: 80%;
+}
+.credit a {
+	color: #666 !important;
+}
+</style>
+</head>
+<body>
+
+<h1><span id=tmtitle>日本</span>カラム地図 エリア対応</h1>
+
+<div id="tmapc"></div>
+<button id="back">もどる</button>
+
+<div class="credit">
+APP: CC BY <a href=https://fukuno.jig.jp/>@taisukef 福野泰介</a> (<a href=https://fukuno.jig.jp/2821>全国版完成！</a> / <a href=http://fukuno.jig.jp/2467>カラム地図で辿る</a>)<br>
+LAYOUT: <a href=tabularmaps_japan.csv>TabularMaps Japan - 日本カラム地図 CSV</a> CC0 <a href=https://github.com/tabularmaps/hq>カラム地図 / TabularMaps on Github</a><br>
+DATA: <a href=https://github.com/code4fukui/localgovjp>code4fukui/localgovjp: list of local government in Japan (日本の地方自治体一覧オープンデータ)</a><br>
+Reference: <a href=https://www.pref.nagano.lg.jp/10koiki/index.html>長野県の10広域／長野県</a><br>
+</div>
+
+</body>
+</html>
