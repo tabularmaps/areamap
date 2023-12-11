@@ -1,12 +1,12 @@
 export const create = (tag) => document.createElement(tag);
 export const get = (id) => document.getElementById(id);
 
-export const makeGrids = (stab) => {
+export const makeGrids = (stab, separator = " ") => {
   const area = [];
   let maxc = 0;
   const lines = stab.split("\n");
 	for (let a of lines) {
-    const row = a.split(" ");
+    const row = a.split(separator);
     if (row.length > 1 || row[0].length > 0) {
       area.push(row);
       if (row.length > maxc) {
