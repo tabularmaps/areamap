@@ -562,7 +562,7 @@ var getLastDayOfMonth = function(year, month) {
 
 const fetchCSVtoJSON = async url => csv2json(decodeCSV(await (await fetch(url)).text()))
 
-const makeGrids = function(stab) {
+const makeGrids = function(stab, funcconv = null) {
   const area = []
   let maxc = 0
   const lines = stab.split('\n')
@@ -585,6 +585,7 @@ const makeGrids = function(stab) {
       const div = document.createElement('span')
       c.appendChild(div)
       div.textContent = a
+			funcconv(div)
       areas.push(a)
     }
   }

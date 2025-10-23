@@ -7,6 +7,9 @@
 <script type='module'>
 
 import util from './util.mjs'
+import { encodeHTML } from "https://js.sabae.cc/encodeHTML.js"
+
+chk_phrase.checked = new URLSearchParams(location.search).get("phrase") == "on";
 
 window.onload = async function() {
 	const url_citiesjp = 'https://code4fukui.github.io/localgovjp/localgovjp-utf8.csv'
@@ -15,6 +18,11 @@ window.onload = async function() {
 	const getCityData = function(pref, city) {
 		for (const d of cities) {
 			if (d.pref == pref && d.city == city) {
+				return d
+			}
+		}
+		for (const d of cities) {
+			if (pref.startsWith(d.pref) && city.startsWith(d.city)) {
 				return d
 			}
 		}
@@ -34,7 +42,14 @@ window.onload = async function() {
 		}
 		back.style.display = tmapdata == area[0] ? 'none' : 'inline-block'
 		
-		const tmap = util.makeGrids(tmapdata.tabularmap)
+		const tmap = util.makeGrids(tmapdata.tabularmap, (c) => {
+			if (!chk_phrase.checked) return;
+			const name = c.textContent;
+			const item = cities.find(i => i.pref == name || i.city == name);
+			if (item) {
+				c.innerHTML = encodeHTML(name) + "<br><div class=phrase>" + encodeHTML(item.phrase) + "</div>";
+			}
+		});
 		tmapc.innerHTML = ''
 		tmapc.appendChild(tmap)
 		tmtitle.textContent = tmapdata.name_ja
@@ -51,7 +66,7 @@ window.onload = async function() {
 					}
 					// pref
 					for (const d of area) {
-						if (d.name_ja == name) {
+						if (name.startsWith(d.name_ja)) {
 							show(d.name)
 							document.location.hash = '#' + d.name
 							break
@@ -77,6 +92,11 @@ window.onload = async function() {
 		document.location.hash = ''
 	}
 }
+
+chk_phrase.oninput = () => {
+	onhashchange();
+};
+
 const checkTabularMaps = function(area, cities) {
 	const contains = function(pid, cityname) {
 		for (const c of cities) {
@@ -124,8 +144,8 @@ h1 {
 	margin-top: 2vw;
 }
 /* tabularmaps */
-#tmapc span {
-	display: flex;
+#tmapc > div > span {
+	x-display: flex;
 	font-size: 2.0vmax;
 	align-items: center;
 	justify-content: center;
@@ -143,6 +163,10 @@ h1 {
 	margin: 1vw;
 	padding: .5vw;
 }
+.phrase {
+	font-size: 70%;
+	margin-top: .5em;
+}
 /* credit */
 .credit {
 	margin: 20px;
@@ -159,7 +183,8 @@ h1 {
 <h1><span id=tmtitle>日本</span>カラム地図</h1>
 
 <div id="tmapc"></div>
-<button id='back'>もどる</button>
+<button id='back'>もどる</button><br>
+<label><input type=checkbox id='chk_phrase'>キャッチフレーズ表示</label>
 
 <div class="credit">
 APP: CC BY <a href=https://fukuno.jig.jp/>@taisukef 福野泰介</a> (<a href=https://fukuno.jig.jp/2821>全国版完成！</a> / <a href=http://fukuno.jig.jp/2467>カラム地図で辿る</a>)<br>
